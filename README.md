@@ -18,7 +18,7 @@ Made by **Edmond Yang**
 - **Weapon Clash**: blade-on-blade exchanges and a grinding bind.
 - **Effects**: slow motion and zoom on knockouts and takedowns, impact bursts, flash frames, speed lines, red spray on blade hits, and an optional "heads roll" on blade finishers.
 - **Synthesized sound**: all SFX are generated live with the Web Audio API, so there are no audio files.
-- **Copy as text**: copies the fight as a time-coded text prompt (fighters as Fighter One, Two…, one line per move) to paste into an AI video generator such as Seedance. Fights longer than 15 s are split into clips.
+- **Copy as text**: copies the fight as a time-coded text prompt (fighters as Fighter One, Two…, one line per move) to paste into an AI video generator such as Seedance. Fights longer than 30 s are split into clips.
 - **Video export**: records the canvas and audio to MP4 (or WebM, depending on the browser) at any playback speed.
 - **Editor**: a timeline with undo, drag-to-reorder, duplicate and delete. Moves have search and category filters with pose thumbnails. Fighters have names, colors, weapons and headbands, and there's an optional "VS" title card.
 

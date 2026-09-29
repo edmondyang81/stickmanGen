@@ -1011,8 +1011,8 @@ function sequenceText(){
     beats.push({t0:realTime(sg.T0),t1:realTime(sg.T1),txt});
   });
   const total=realTime(TL.end);
-  // Seedance clips are at most 15 s; split at move boundaries
-  const MAX=15, clips=[]; let cur={start:0,beats:[]};
+  // Seedance clips are at most 30 s; split at move boundaries
+  const MAX=30, clips=[]; let cur={start:0,beats:[]};
   beats.forEach(b=>{ if(cur.beats.length&&b.t1-cur.start>MAX){cur.end=b.t0;clips.push(cur);cur={start:b.t0,beats:[]};} cur.beats.push(b); });
   const lastT1=cur.beats[cur.beats.length-1].t1; cur.end=Math.min(total,lastT1+1,Math.max(lastT1,cur.start+MAX)); clips.push(cur);
   const out=[];
@@ -1028,7 +1028,7 @@ function sequenceText(){
     c.beats.forEach(b=>out.push(`[${fmt(b.t0-c.start)}–${fmt(b.t1-c.start)}s] ${b.txt}.`));
     out.push('');
   });
-  if(clips.length>1) out.push(`Total: ${fmt(clips[clips.length-1].end)} s at ${rate}× speed. Seedance clips max out at 15 s, so generate each clip separately and join them, or extend Clip 1 with the next.`);
+  if(clips.length>1) out.push(`Total: ${fmt(clips[clips.length-1].end)} s at ${rate}× speed. Seedance clips max out at 30 s, so generate each clip separately and join them, or extend Clip 1 with the next.`);
   return out.join('\n').trim()+'\n';
 }
 async function copyText(txt){
