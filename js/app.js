@@ -980,19 +980,22 @@ const DESC={
   axKO_keep:'{A} leaps high and brings the axe down on {D} in an executioner\'s chop; {D} falls face down. KNOCKOUT',
   axKO:'{A} leaps high and brings the axe down on {D} in an executioner\'s chop, taking off {D}\'s head; {D} falls face down. KNOCKOUT',
 };
+// prompts refer to fighters by roster position, never by their names
+const NUMW=['One','Two','Three','Four'];
+function fighterLabel(id){ const i=roster.findIndex(r=>r.id===id); return 'Fighter '+(NUMW[i]||i+1); }
 function fighterLine(r){
   const col=(COLORS.find(c=>c[0]===r.color)||[,'ink'])[1].toLowerCase();
   const parts=[col==='ink'?'black stick figure':`${col} stick figure`];
   if(r.band) parts.push(`${r.color===RED?'black':'red'} headband with long trailing tails`);
   if(r.weapon==='sword') parts.push('holding a one-handed sword');
   if(r.weapon==='axe') parts.push('holding a two-handed axe');
-  return `${r.name}: ${parts.join(', ')}.`;
+  return `${fighterLabel(r.id)}: ${parts.join(', ')}.`;
 }
 // wall-clock seconds at the current playback speed (slow-mo stretches time)
 function realTime(T){ let s=0; for(let t=0;t<T;t+=.01) s+=Math.min(.01,T-t)/(rate*speedAt(t)); return s; }
 function sequenceText(){
   if(!seq.length) return '';
-  const nm=id=>nameOf(id), fmt=s=>s.toFixed(1).replace(/\.0$/,'');
+  const nm=fighterLabel, fmt=s=>s.toFixed(1).replace(/\.0$/,'');
   const beats=[];
   TL.segs.forEach(sg=>{
     if(sg.auto==='engage') return;
@@ -1007,8 +1010,6 @@ function sequenceText(){
   beats.forEach(b=>{ if(cur.beats.length&&b.t1-cur.start>MAX){cur.end=b.t0;clips.push(cur);cur={start:b.t0,beats:[]};} cur.beats.push(b); });
   const lastT1=cur.beats[cur.beats.length-1].t1; cur.end=Math.min(total,lastT1+1,Math.max(lastT1,cur.start+MAX)); clips.push(cur);
   const out=[];
-  out.push('Style: 2D hand-drawn stick-figure kung fu animation in the style of classic Flash-era stick fight cartoons (Xiaoxiao). Solid black stick figures with round heads and thin limbs on a plain off-white paper background with a single flat ground line. Minimal ink-on-paper look with red accents. Fast, snappy martial-arts choreography, motion blur trails, speed lines, white impact flashes and dust puffs on hits. Side-on 2D view; the camera tracks the action and zooms in with slow motion on knockouts. Punchy hit, whoosh and thud sound effects.');
-  out.push('');
   out.push('Fighters:');
   const used=new Set(); seq.forEach(it=>{used.add(it.who);used.add(it.vs);});
   roster.filter(r=>used.has(r.id)).forEach(r=>out.push('- '+fighterLine(r)));
@@ -1016,7 +1017,7 @@ function sequenceText(){
   clips.forEach((c,ci)=>{
     const len=c.end-c.start;
     out.push(clips.length>1?`Clip ${ci+1} of ${clips.length} (${fmt(len)} s):`:`Action (${fmt(len)} s):`);
-    if(ci===0) out.push(`[0–${fmt(Math.max(.5,c.beats[0].t0))}s] ${showTitle?'Title card with the fighters\' names, then the':'The'} fighters run in from opposite sides and square off in fighting stances.`);
+    if(ci===0) out.push(`[0–${fmt(Math.max(.5,c.beats[0].t0))}s] ${showTitle?'Title card, then the':'The'} fighters run in from opposite sides and square off in fighting stances.`);
     else out.push('Continues directly from the previous clip, same fighters, same style.');
     c.beats.forEach(b=>out.push(`[${fmt(b.t0-c.start)}–${fmt(b.t1-c.start)}s] ${b.txt}.`));
     out.push('');

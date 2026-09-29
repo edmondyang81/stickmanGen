@@ -110,7 +110,7 @@ Everything is synthesized with `nz()` (filtered noise) and `tone()` (oscillator 
 - **localStorage keys** (`stickman-*`): `seq roster zoom flow tags title behead rate sound tab`.
 
 ## Copy as text
-`sequenceText()` builds a video prompt (for Seedance): a style paragraph, fighter lines from the roster, then `[t0–t1s]` beats from `TL.segs` using `DESC[id]` (`{A}`/`{D}` placeholders; `*_keep` variants when heads roll is off). Times are wall-clock at the current speed, including slow-mo (`realTime()`), and the beats are split into clips of 15 s or less. **When adding a move, add a `DESC` line too.** `window.__stick.text()` returns the text.
+`sequenceText()` builds a video prompt (for Seedance): fighter lines from the roster (fighters are always "Fighter One/Two/…" by roster position, never their names; no style paragraph, per the owner), then `[t0–t1s]` beats from `TL.segs` using `DESC[id]` (`{A}`/`{D}` placeholders; `*_keep` variants when heads roll is off). Times are wall-clock at the current speed, including slow-mo (`realTime()`), and the beats are split into clips of 15 s or less. **When adding a move, add a `DESC` line too.** `window.__stick.text()` returns the text.
 
 ## Export
 `MediaRecorder` captures `canvas.captureStream(60)` plus the audio track at 1920×1080, 10 Mbps, preferring MP4 (avc1) and falling back to WebM. It records in real time at the current speed. Inside claude.ai it uses the artifact `downloads` capability (`window.claude.use('downloads')`). Everywhere else (GitHub Pages, local) it uses `browserSave()`, which is a plain `<a download>`.
