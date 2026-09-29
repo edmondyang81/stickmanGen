@@ -926,8 +926,14 @@ $('random').onclick=()=>{
   const vsOf=(id,f)=>id==='A'?f:'A';
   const pool=(id,f)=>ORDER.filter(k=>!MOVES[k].ko&&!whyNot(k,id,vsOf(id,f))), kos=(id,f)=>ORDER.filter(k=>MOVES[k].ko&&!whyNot(k,id,vsOf(id,f)));
   const pick=a=>a[Math.floor(Math.random()*a.length)], foes=roster.slice(1).map(r=>r.id);
+  // armed fighters lean on their weapon: weapon moves are 4× as likely, and they finish with a weapon KO when one exists
+  const isWpn=k=>!!MOVES[k].wpn||(NEEDS[k]&&NEEDS[k].X==='weapon');
+  const armed=id=>rosterMap[id]&&rosterMap[id].weapon!=='none';
+  const pickW=(list,id)=>{ if(!armed(id)) return pick(list); const w=list.filter(isWpn); if(!w.length) return pick(list);
+    if(MOVES[list[0]].ko) return pick(w); const tot=list.length+3*w.length; let r=Math.random()*tot;
+    for(const k of list){ r-=isWpn(k)?4:1; if(r<0) return k; } return pick(list); };
   commit(()=>{ seq=[];
-    const add=(w,f,ko)=>{const list=ko?kos(w,f):pool(w,f); if(list.length) seq.push({id:pick(list),who:w,vs:vsOf(w,f)});};
+    const add=(w,f,ko)=>{const list=ko?kos(w,f):pool(w,f); if(list.length) seq.push({id:pickW(list,w),who:w,vs:vsOf(w,f)});};
     if(foes.length===1){ for(let i=0;i<7;i++) add(Math.random()<.6?'A':foes[0],foes[0]); add('A',foes[0],1); }
     else foes.forEach(f=>{const n=2+Math.floor(Math.random()*2); for(let i=0;i<n;i++) add(Math.random()<.65?'A':f,f); add('A',f,1);});
   },'Random fight');
