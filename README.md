@@ -1,10 +1,12 @@
-# Stickman Duel
+# StickMan Gen
 
 Build stick-figure kung fu fights in the browser. Pick moves from a library, chain them into a sequence, and export the fight as a 1080p video with sound.
 
 Ink-on-paper stick figures in the spirit of the classic Flash-era stick fight animations, with an original move set and choreography.
 
-**Live:** https://stickmangen.vercel.app
+**Live:** https://stickmangen.vercel.app  
+**Source:** https://github.com/edmondyang81/stickmanGen  
+Made by **Edmond Yang**
 
 ## Features
 

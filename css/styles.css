@@ -1,4 +1,4 @@
-/* Stickman Duel — styles */
+/* StickMan Gen — styles */
 
 body{margin:0}
 /* Layout: editor. Left column = paper stage, transport and the fight timeline; right column = tabbed sidebar (Moves / Fighters / Settings). Stacks to one column on phones. */
@@ -18,6 +18,9 @@ header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-betw
 .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);letter-spacing:.02em;margin:0;line-height:1}
 h1 span{color:var(--red)}
+footer{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;padding-top:8px;overflow-wrap:anywhere}
+footer a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--dim);text-underline-offset:3px}
+footer a:hover{text-decoration-color:var(--red)}
 .meta{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 h2{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.04em;margin:0}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}

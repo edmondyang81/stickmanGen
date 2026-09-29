@@ -1,4 +1,4 @@
-# Stickman Duel: handoff
+# StickMan Gen (formerly Stickman Duel): handoff
 
 This is the handoff for continuing work in Claude Code. The project was built in a claude.ai chat session as a published artifact, then exported to this folder as a plain static web app.
 

@@ -1,4 +1,4 @@
-/* Stickman Duel — engine, renderer, synthesized audio and editor UI */
+/* StickMan Gen — engine, renderer, synthesized audio and editor UI */
 (()=>{
 /* ================= SKELETON ================= */
 const L={torso:34,neck:6,head:9,ua:20,fa:20,th:24,sh:24}, GAP=70;
@@ -988,7 +988,7 @@ $('export').onclick=()=>{
     if(canceled){status('Export canceled.');return;}
     const type=recorder.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
     const blob=new Blob(chunks,{type}); status(`Rendered ${(blob.size/1048576).toFixed(1)} MB ${ext.toUpperCase()}. Confirm the save to download it.`);
-    const fname=`stickman-duel-${rate}x.${ext}`;
+    const fname=`stickman-gen-${rate}x.${ext}`;
     if(!downloads){browserSave(blob,fname); status(`Saved ${fname} (1920×1080${soundOn?', with sound':''}).`); return;}
     try{await downloads.save({filename:fname,data:blob}); status(`Saved ${fname} (1920×1080${soundOn?', with sound':''}).`);}
     catch(err){const code=err&&err.code; status(code==='declined'?'Save declined. Export again whenever you like.':code==='rate_limited'?'A save prompt is already open.':`Couldn’t save the video (${code||'error'}).`,code!=='declined');}
