@@ -885,26 +885,19 @@ function paintSound(){$('sound').innerHTML=soundOn?ICON.snd:ICON.mute;$('sound')
 soundOn=ls.get('stickman-sound')!=='0'; paintSound();
 $('sound').onclick=()=>{soundOn=!soundOn;ls.set('stickman-sound',soundOn?'1':'0');paintSound();if(soundOn)ensureAudio();toast(soundOn?'Sound on':'Sound off');};
 
-/* ---- timeline ---- */
-const PPS=92, track=$('track'), wrap=$('trackWrap'); let ph=null, dragIdx=null;
+/* ---- sequence list: moves in order, no time scale ---- */
+const track=$('track'), wrap=$('trackWrap'); let dragIdx=null;
 function renderTimeline(){
-  track.innerHTML=''; const W2=Math.max(wrap.clientWidth,TL.end*PPS+40); track.style.width=W2+'px';
-  const ruler=document.createElement('div'); ruler.className='ruler'; track.appendChild(ruler);
-  for(let s=0;s<=TL.end;s++){const t=document.createElement('div');t.className='tick';t.style.left=(s*PPS)+'px';t.textContent=s%2?'':s+'s';ruler.appendChild(t);}
-  const first=TL.segs[0]; const introEnd=first?first.T0:TL.end-1.6;
-  const intro=document.createElement('div'); intro.className='blk intro'; intro.style.left='0px'; intro.style.width=Math.max(30,introEnd*PPS-4)+'px';
-  intro.innerHTML=`<span class="nm">${showTitle?'Title + intro':'Intro'}</span><span class="sub">fighters enter</span>`; track.appendChild(intro);
-  if(!seq.length){const e=document.createElement('div');e.className='empty';e.style.left=(introEnd*PPS+12)+'px';e.textContent='Tap moves in the list to build your fight →';track.appendChild(e);}
-  const multi=roster.length>2;
-  TL.segs.forEach(sg=>{
-    if(sg.auto==='engage') return;
-    const el=document.createElement('div'); el.style.left=(sg.T0*PPS+1)+'px'; el.style.width=Math.max(26,(sg.T1-sg.T0)*PPS-3)+'px'; el.dataset.t0=sg.T0; el.dataset.t1=sg.T1;
-    if(sg.auto){el.className='blk auto';el.innerHTML='<span class="nm">Get up</span><span class="sub">auto</span>';track.appendChild(el);return;}
-    const i=sg.idx, mv=MOVES[seq[i].id];
+  track.innerHTML='';
+  if(!seq.length){const e=document.createElement('div');e.className='empty';e.textContent='Tap moves in the list to build your fight →';track.appendChild(e);}
+  const segOf={}; TL.segs.forEach(sg=>{ if(!sg.auto) segOf[sg.idx]=sg; });
+  seq.forEach((it,i)=>{
+    const mv=MOVES[it.id], sg=segOf[i];
+    const el=document.createElement('div');
     el.className='blk'+(i===selIdx?' sel':''); el.draggable=true; el.dataset.idx=i;
-    el.innerHTML=`<span class="stripe" style="background:${colorOf(sg.who)}"></span><span class="nm">${sg.name}</span><span class="sub">${nameOf(sg.who)}${multi||true?` → ${nameOf(sg.vs)}`:''}${mv.ko?' <span class="ko">KO</span>':''}</span>`;
-    el.title=`${i+1}. ${sg.name}: ${nameOf(sg.who)} → ${nameOf(sg.vs)}`;
-    el.addEventListener('click',ev=>{ev.stopPropagation(); selIdx=i; seek(sg.T0); renderTimeline(); });
+    el.innerHTML=`<span class="stripe" style="background:${colorOf(it.who)}"></span><span class="nm"><span class="num">${i+1}</span>${mv.name}</span><span class="sub">${nameOf(it.who)} → ${nameOf(it.vs)}${mv.ko?' <span class="ko">KO</span>':''}</span>`;
+    el.title=`${i+1}. ${mv.name}: ${nameOf(it.who)} → ${nameOf(it.vs)}`;
+    el.addEventListener('click',ev=>{ev.stopPropagation(); selIdx=i; if(sg) seek(sg.T0); renderTimeline(); });
     el.addEventListener('dragstart',ev=>{dragIdx=i;el.classList.add('drag');ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain',String(i));}catch(_){} });
     el.addEventListener('dragend',()=>{dragIdx=null;track.querySelectorAll('.blk').forEach(n=>n.classList.remove('drag','dropL','dropR'));});
     el.addEventListener('dragover',ev=>{ev.preventDefault();const r=el.getBoundingClientRect(),right=ev.clientX>r.left+r.width/2;el.classList.toggle('dropR',right);el.classList.toggle('dropL',!right);});
@@ -914,7 +907,7 @@ function renderTimeline(){
       commit(()=>{const [m]=seq.splice(from,1);seq.splice(to,0,m);},`Moved ${MOVES[seq[from].id].name}`); selIdx=to; renderTimeline();});
     track.appendChild(el);
   });
-  ph=document.createElement('div'); ph.className='playhead'; track.appendChild(ph);
+  lastOn=undefined;
   renderSel();
 }
 function renderSel(){ const sb=$('selbar'); if(selIdx<0||!seq[selIdx]){sb.hidden=true;return;} sb.hidden=false; const it=seq[selIdx];
@@ -924,15 +917,7 @@ $('selL').onclick=()=>{const i=selIdx; if(i<1) return; commit(()=>{[seq[i-1],seq
 $('selR').onclick=()=>{const i=selIdx; if(i>=seq.length-1) return; commit(()=>{[seq[i+1],seq[i]]=[seq[i],seq[i+1]];}); selIdx=i+1; renderTimeline();};
 $('selDup').onclick=()=>{const i=selIdx; if(i<0) return; commit(()=>{seq.splice(i+1,0,{...seq[i]});},`Duplicated ${MOVES[seq[i].id].name}`); selIdx=i+1; renderTimeline();};
 $('selDel').onclick=()=>{const i=selIdx; if(i<0) return; const n=MOVES[seq[i].id].name; selIdx=-1; commit(()=>{seq.splice(i,1);},`Deleted ${n} · Ctrl Z to undo`);};
-// scrub by pressing and dragging on the strip
-let scrubbing=false;
-track.addEventListener('pointerdown',ev=>{ if(ev.target.closest('.blk:not(.intro):not(.auto)')) return; scrubbing=true; dragging=true; track.setPointerCapture(ev.pointerId); scrubTo(ev);});
-track.addEventListener('pointermove',ev=>{ if(scrubbing) scrubTo(ev); });
-const endScrub=()=>{scrubbing=false;dragging=false;};
-track.addEventListener('pointerup',endScrub); track.addEventListener('pointercancel',endScrub);
-function scrubTo(ev){const r=track.getBoundingClientRect(); seek((ev.clientX-r.left)/PPS); if(selIdx>=0){selIdx=-1;renderSel();track.querySelectorAll('.blk.sel').forEach(n=>n.classList.remove('sel'));}}
-function scrollTimelineTo(t){const x=t*PPS; wrap.scrollLeft=Math.max(0,x-wrap.clientWidth+60);}
-new ResizeObserver(()=>{ if(TL) renderTimeline(); }).observe(wrap);
+function scrollTimelineTo(){ const last=track.lastElementChild; if(last) last.scrollIntoView({block:'nearest'}); }
 
 /* ---- presets ---- */
 $('classic').onclick=()=>{ if(!rosterMap.B){toast('Classic needs INK in the fight');return;} const cl=classic(), ok=cl.filter(it=>!whyNot(it.id,it.who,it.vs)); commit(()=>{seq=ok;},ok.length<cl.length?`Loaded the classic fight · skipped ${cl.length-ok.length} that don't fit the weapons`:'Loaded the classic fight'); seek(0); setPlaying(true);};
@@ -1010,8 +995,6 @@ function tick(now){
   }
   frame(animT);
   $('time').textContent=`${animT.toFixed(1)} / ${TL.end.toFixed(1)} s`;
-  if(ph){ const x=animT*PPS; ph.style.left=x+'px';
-    if(playing&&!scrubbing&&(x>wrap.scrollLeft+wrap.clientWidth-40||x<wrap.scrollLeft)) wrap.scrollLeft=Math.max(0,x-80); }
   const on=(TL.segs.find(s=>!s.auto&&animT>=s.T0&&animT<s.T1)||{}).idx;
   if(on!==lastOn){ track.querySelectorAll('.blk[data-idx]').forEach(el=>el.classList.toggle('on',+el.dataset.idx===on)); lastOn=on; }
   requestAnimationFrame(tick);

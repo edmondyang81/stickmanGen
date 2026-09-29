@@ -41,7 +41,7 @@ js/app.js         one IIFE, sections in this order:
   COMPILER        compile(seq, roster, flow) → TL; build(); poseAt(); skel(); sk(); speedAt()
   AUDIO           Web Audio synth: ensureAudio, nz(), tone(), SFX table, playSfx()
   RENDER          canvas frame(T), drawFigure, effects, title card, head-roll, look/colours
-  STATE & UI      roster/seq state, localStorage, undo, tabs, matchup, palette + thumbnails, fighters, settings, timeline
+  STATE & UI      roster/seq state, localStorage, undo, tabs, matchup, palette + thumbnails, fighters, settings, sequence list
   EXPORT          MediaRecorder capture (canvas + audio) → save
   LOOP            requestAnimationFrame tick, SFX triggering, playhead
 ```
@@ -103,7 +103,7 @@ Everything is synthesized with `nz()` (filtered noise) and `tone()` (oscillator 
 
 ## UI
 - **Tabs:** Moves (matchup card attacker ⇄ target, search, category chips, cards with pose thumbnails drawn by `thumb()`), Fighters (name, colour swatches, weapon, headband, add/remove), Settings (chaining, camera, title card, heads roll, name tags).
-- **Timeline:** blocks at `PPS=92` px per second. Click a block to select it and seek; the edit bar offers Earlier/Later/Duplicate/Delete. HTML5 drag reorders; press on the strip to scrub. Auto get-up blocks are dashed, and engage segments are hidden.
+- **Sequence list** (replaced the time-scaled timeline at the owner's request): a grid of numbered move cards in play order, with no ruler, playhead or scrubbing. Click a card to select it and seek; the edit bar offers Earlier/Later/Duplicate/Delete. HTML5 drag reorders. The playing move is highlighted. Auto get-ups aren't shown.
 - **Undo:** `commit(fn, msg)` pushes a snapshot, and `undo()` restores it. Ctrl/Cmd+Z works too.
 - **Keys:** Space (play/pause), ←/→ (previous/next move), Delete (remove selected move).
 - **Weapon change:** `pruneForWeapons()` removes moves that no longer fit, with Undo available. Random and Classic only pick valid moves.
