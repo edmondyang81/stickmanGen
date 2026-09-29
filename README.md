@@ -4,7 +4,7 @@ Build stick-figure kung fu fights in the browser. Pick moves from a library, cha
 
 Ink-on-paper stick figures in the spirit of the classic Flash-era stick fight animations, with an original move set and choreography.
 
-**Live:** https://edmondyang81.github.io/stickmanGen
+**Live:** https://stickmangen.vercel.app
 
 ## Features
 
@@ -20,15 +20,7 @@ Ink-on-paper stick figures in the spirit of the classic Flash-era stick fight an
 
 ## Run it
 
-There's no build step and no dependencies. Open `index.html` in a browser, or serve the folder:
-
-```bash
-npx serve .
-# or
-python3 -m http.server 8000
-```
-
-To host it on **GitHub Pages**, go to *Settings → Pages → Deploy from a branch → `main` / root*.
+Use it online at **[stickmangen.vercel.app](https://stickmangen.vercel.app)**, or download the repo and open `index.html` in your browser. There's no install, build or server.
 
 ## Controls
 
