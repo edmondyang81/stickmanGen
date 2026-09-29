@@ -6,6 +6,7 @@ Ink-on-paper stick figures in the spirit of the classic Flash-era stick fight an
 
 **Live:** https://stickmangen.vercel.app  
 **Source:** https://github.com/edmondyang81/stickmanGen  
+**Version:** v1.1 ([changelog](CHANGELOG.md))  
 Made by **Edmond Yang**
 
 ## Features

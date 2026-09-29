@@ -26,6 +26,11 @@ The folder lives in Dropbox. Don't let Dropbox and git fight: work on one machin
 
 ---
 
+## Versioning
+The current version is shown in the footer (`index.html`), the README and `CHANGELOG.md`, and each release has a git tag (`v1.0`, `v1.1`, …). For a release, bump all three, add a changelog entry, then tag and push the tag.
+
+---
+
 ## What the app does
 
 A browser editor for stick-figure kung fu fights in the Flash-era "Xiaoxiao" style, with an original move set and choreography. Users pick moves from a library, chain them on a timeline, customise up to 4 fighters, and export an MP4/WebM with synthesized sound.
