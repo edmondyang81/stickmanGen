@@ -934,6 +934,106 @@ $('random').onclick=()=>{
   selIdx=-1; seek(0); setPlaying(true);};
 $('undo').onclick=undo; $('undo').disabled=true;
 
+/* ---- copy sequence as text (video prompt for Seedance and similar) ---- */
+// {A} = attacker, {D} = defender
+const DESC={
+  jab:'{A} snaps a jab and a straight cross into {D}\'s face, knocking {D} back a step each time',
+  rush:'{A} rushes in with three fast punches and finishes with a high kick that snaps {D}\'s head back',
+  flurry:'{A} unleashes a blur of rapid-fire punches ("hundred fists"), then a palm strike that sends {D} sliding back',
+  elbow:'{A} drives an elbow into {D}, grabs {D} and slams a knee into {D}\'s stomach, doubling {D} over',
+  backfist:'{A} spins a full turn and cracks a spinning backfist across {D}\'s face',
+  counter:'{D} throws a punch, {A} blocks it, then counters with a punch and a high kick',
+  dodge:'{D} punches, {A} leans back to slip it, then lunges in with a palm strike that knocks {D} flying back',
+  kick:'{A} whips a high roundhouse kick into {D}\'s head',
+  lowkick:'{A} chops a low kick into {D}\'s leg, dropping {D} to one knee',
+  axe:'{A} raises a leg high and brings an axe kick crashing down on {D}, driving {D} to a knee',
+  sweep:'{A} drops low and spins a leg sweep; {D} hops over it and lands in a crouch',
+  tornado:'{A} does a backflip into a flying kick that hits {D} in the face',
+  fly:'{A} leaps into a flying kick; {D} blocks it with both arms and skids back',
+  bicycle:'{A} jumps into a bicycle kick, landing a rapid chain of kicks that drives {D} back across the ground',
+  upper:'{D} throws a high kick, {A} ducks under it and explodes up with an uppercut that flips {D} through the air; {D} lands back on their feet',
+  juggle:'{A} launches {D} into the air with an uppercut, leaps after them, strikes them in mid-air and smashes them down with an axe kick; {D} rolls back up',
+  flip:'{A} somersaults high over {D}\'s head and lands on the other side, turning to face {D}',
+  clash:'both fighters leap at each other with flying kicks; their feet collide mid-air in a flash, and they land on opposite sides',
+  tackle:'{A} sprints in and rams {D} with a shoulder charge, sending {D} tumbling away',
+  throw:'{A} grabs {D} and hurls {D} over the shoulder onto the ground behind; {D} rolls back to their feet',
+  wslash:'{A} sweeps the sword up in a rising slash across {D}',
+  wchop:'{A} brings the sword down in an overhead chop; {D} blocks and is driven to a knee',
+  wthrust:'{A} lunges forward with a straight sword thrust into {D}, knocking {D} back',
+  wspin:'{A} spins in a whirl of sword cuts, slashing {D} three times',
+  axCleave:'{A} heaves the axe overhead and cleaves down; {D} blocks and is hammered to a knee',
+  axSweep:'{A} swings the axe in a wide horizontal sweep that smashes {D} away',
+  axSpin:'{A} spins with the axe in a whirlwind, hitting {D} twice',
+  wclash:'the two fighters trade weapon blows, blade ringing on blade, then lock weapons in a grinding bind before shoving apart',
+  shadow:'{A} dashes past {D} in a blur like a shadow, reappears behind {D} and cracks a backfist into their back',
+  whirl:'{A} leaps into a spinning whirlwind kick, hitting {D} again and again in mid-air',
+  kiblast:'{A} gathers a glowing ball of energy in both hands and fires it; the blast hits {D} and throws {D} back',
+  quake:'{A} leaps up and slams a fist into the ground; a shockwave cracks the floor and knocks {D} off their feet',
+  matrix:'{D} fires shots at {A}; time slows to bullet time and {A} bends far back to dodge, then springs forward with a palm strike that knocks {D} away',
+  dragon:'{A} explodes upward with a rising dragon uppercut, launching {D} high into the air; {D} crashes down and stays down. KNOCKOUT',
+  ko1:'{A} crouches and fires a massive uppercut that launches {D} spinning through the air; {D} lands on their back and stays down. KNOCKOUT',
+  ko2:'both fighters leap and pass each other in mid-air in one decisive strike, landing back to back; a beat of stillness, then {D} drops to their knees and falls face down. KNOCKOUT',
+  ko3:'{A} raises a leg high and drops a devastating axe kick on {D}; {D} crumples face down. KNOCKOUT',
+  ko4:'{A} spins up a hurricane of strikes and fires a palm blast that hurls {D} far across the ground; {D} stays down. KNOCKOUT',
+  wko_keep:'{A} sheathes the sword and waits, then dashes past {D} with a lightning-fast draw cut; a beat later {D} collapses face down. KNOCKOUT',
+  wko:'{A} sheathes the sword and waits, then dashes past {D} with a lightning-fast draw cut; a beat later {D}\'s head falls and {D} collapses face down. KNOCKOUT',
+  axKO_keep:'{A} leaps high and brings the axe down on {D} in an executioner\'s chop; {D} falls face down. KNOCKOUT',
+  axKO:'{A} leaps high and brings the axe down on {D} in an executioner\'s chop, taking off {D}\'s head; {D} falls face down. KNOCKOUT',
+};
+function fighterLine(r){
+  const col=(COLORS.find(c=>c[0]===r.color)||[,'ink'])[1].toLowerCase();
+  const parts=[col==='ink'?'black stick figure':`${col} stick figure`];
+  if(r.band) parts.push(`${r.color===RED?'black':'red'} headband with long trailing tails`);
+  if(r.weapon==='sword') parts.push('holding a one-handed sword');
+  if(r.weapon==='axe') parts.push('holding a two-handed axe');
+  return `${r.name}: ${parts.join(', ')}.`;
+}
+// wall-clock seconds at the current playback speed (slow-mo stretches time)
+function realTime(T){ let s=0; for(let t=0;t<T;t+=.01) s+=Math.min(.01,T-t)/(rate*speedAt(t)); return s; }
+function sequenceText(){
+  if(!seq.length) return '';
+  const nm=id=>nameOf(id), fmt=s=>s.toFixed(1).replace(/\.0$/,'');
+  const beats=[];
+  TL.segs.forEach(sg=>{
+    if(sg.auto==='engage') return;
+    let txt;
+    if(sg.auto==='getup') txt=`${nm(sg.pair[0])} gets back up`;
+    else { const it=seq[sg.idx]; txt=(DESC[it.id+(beheadOn?'':'_keep')]||DESC[it.id]||`${nm(it.who)} hits ${nm(it.vs)} with ${MOVES[it.id].name}`).replace(/\{A\}/g,nm(it.who)).replace(/\{D\}/g,nm(it.vs)); txt=`${MOVES[it.id].name}: ${txt}`; }
+    beats.push({t0:realTime(sg.T0),t1:realTime(sg.T1),txt});
+  });
+  const total=realTime(TL.end);
+  // Seedance clips are at most 15 s; split at move boundaries
+  const MAX=15, clips=[]; let cur={start:0,beats:[]};
+  beats.forEach(b=>{ if(cur.beats.length&&b.t1-cur.start>MAX){cur.end=b.t0;clips.push(cur);cur={start:b.t0,beats:[]};} cur.beats.push(b); });
+  const lastT1=cur.beats[cur.beats.length-1].t1; cur.end=Math.min(total,lastT1+1,Math.max(lastT1,cur.start+MAX)); clips.push(cur);
+  const out=[];
+  out.push('Style: 2D hand-drawn stick-figure kung fu animation in the style of classic Flash-era stick fight cartoons (Xiaoxiao). Solid black stick figures with round heads and thin limbs on a plain off-white paper background with a single flat ground line. Minimal ink-on-paper look with red accents. Fast, snappy martial-arts choreography, motion blur trails, speed lines, white impact flashes and dust puffs on hits. Side-on 2D view; the camera tracks the action and zooms in with slow motion on knockouts. Punchy hit, whoosh and thud sound effects.');
+  out.push('');
+  out.push('Fighters:');
+  const used=new Set(); seq.forEach(it=>{used.add(it.who);used.add(it.vs);});
+  roster.filter(r=>used.has(r.id)).forEach(r=>out.push('- '+fighterLine(r)));
+  out.push('');
+  clips.forEach((c,ci)=>{
+    const len=c.end-c.start;
+    out.push(clips.length>1?`Clip ${ci+1} of ${clips.length} (${fmt(len)} s):`:`Action (${fmt(len)} s):`);
+    if(ci===0) out.push(`[0–${fmt(Math.max(.5,c.beats[0].t0))}s] ${showTitle?'Title card with the fighters\' names, then the':'The'} fighters run in from opposite sides and square off in fighting stances.`);
+    else out.push('Continues directly from the previous clip, same fighters, same style.');
+    c.beats.forEach(b=>out.push(`[${fmt(b.t0-c.start)}–${fmt(b.t1-c.start)}s] ${b.txt}.`));
+    out.push('');
+  });
+  if(clips.length>1) out.push(`Total: ${fmt(clips[clips.length-1].end)} s at ${rate}× speed. Seedance clips max out at 15 s, so generate each clip separately and join them, or extend Clip 1 with the next.`);
+  return out.join('\n').trim()+'\n';
+}
+async function copyText(txt){
+  try{ await navigator.clipboard.writeText(txt); return true; }
+  catch(_){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    let ok=false; try{ok=document.execCommand('copy');}catch(__){} ta.remove(); return ok; }
+}
+$('copyText').onclick=async()=>{
+  if(!seq.length){toast('Add some moves first');return;}
+  toast(await copyText(sequenceText())?'Copied sequence as text':'Copy failed');
+};
+
 /* ---- transport + keys ---- */
 $('play').onclick=()=>setPlaying(!playing);
 $('stage').onclick=()=>{if(!recording)setPlaying(!playing);};
@@ -1005,5 +1105,5 @@ try{document.fonts&&document.fonts.load('40px Anton');}catch(_){}
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(reduce){seek(3.2);setPlaying(false);} else setPlaying(true);
 requestAnimationFrame(tick);
-window.__stick={set:t=>{animT=t;snapCam=true;for(let i=0;i<40;i++)frame(t);},pause:()=>setPlaying(false),end:()=>TL.end,segs:()=>TL.segs};
+window.__stick={text:()=>sequenceText(),set:t=>{animT=t;snapCam=true;for(let i=0;i<40;i++)frame(t);},pause:()=>setPlaying(false),end:()=>TL.end,segs:()=>TL.segs};
 })();
