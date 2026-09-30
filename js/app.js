@@ -895,7 +895,9 @@ function renderTimeline(){
     const mv=MOVES[it.id], sg=segOf[i];
     const el=document.createElement('div');
     el.className='blk'+(i===selIdx?' sel':''); el.draggable=true; el.dataset.idx=i;
-    el.innerHTML=`<span class="stripe" style="background:${colorOf(it.who)}"></span><span class="nm"><span class="num">${i+1}</span>${mv.name}</span><span class="sub">${nameOf(it.who)} → ${nameOf(it.vs)}${mv.ko?' <span class="ko">KO</span>':''}</span>`;
+    el.innerHTML=`<span class="stripe" style="background:${colorOf(it.who)}"></span><span class="nm"><span class="num">${i+1}</span>${mv.name}</span><span class="sub">${nameOf(it.who)} → ${nameOf(it.vs)}${mv.ko?' <span class="ko">KO</span>':''}</span>
+      <span class="ctl"><button type="button" data-act="L" title="Move earlier" aria-label="Move earlier"${i===0?' disabled':''}>◀</button><button type="button" data-act="R" title="Move later" aria-label="Move later"${i===seq.length-1?' disabled':''}>▶</button><button type="button" data-act="D" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" data-act="X" title="Delete" aria-label="Delete">✕</button></span>`;
+    el.querySelectorAll('.ctl button').forEach(bt=>bt.addEventListener('click',ev=>{ev.stopPropagation(); ({L:moveEarlier,R:moveLater,D:dupMove,X:delMove})[bt.dataset.act](i);}));
     el.title=`${i+1}. ${mv.name}: ${nameOf(it.who)} → ${nameOf(it.vs)}`;
     el.addEventListener('click',ev=>{ev.stopPropagation(); selIdx=i; if(sg) seek(sg.T0); renderTimeline(); });
     el.addEventListener('dragstart',ev=>{dragIdx=i;el.classList.add('drag');ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain',String(i));}catch(_){} });
@@ -908,15 +910,11 @@ function renderTimeline(){
     track.appendChild(el);
   });
   lastOn=undefined;
-  renderSel();
 }
-function renderSel(){ const sb=$('selbar'); if(selIdx<0||!seq[selIdx]){sb.hidden=true;return;} sb.hidden=false; const it=seq[selIdx];
-  $('selLbl').textContent=`${selIdx+1}. ${MOVES[it.id].name} · ${nameOf(it.who)} → ${nameOf(it.vs)}`;
-  $('selL').disabled=selIdx===0; $('selR').disabled=selIdx===seq.length-1; }
-$('selL').onclick=()=>{const i=selIdx; if(i<1) return; commit(()=>{[seq[i-1],seq[i]]=[seq[i],seq[i-1]];}); selIdx=i-1; renderTimeline();};
-$('selR').onclick=()=>{const i=selIdx; if(i>=seq.length-1) return; commit(()=>{[seq[i+1],seq[i]]=[seq[i],seq[i+1]];}); selIdx=i+1; renderTimeline();};
-$('selDup').onclick=()=>{const i=selIdx; if(i<0) return; commit(()=>{seq.splice(i+1,0,{...seq[i]});},`Duplicated ${MOVES[seq[i].id].name}`); selIdx=i+1; renderTimeline();};
-$('selDel').onclick=()=>{const i=selIdx; if(i<0) return; const n=MOVES[seq[i].id].name; selIdx=-1; commit(()=>{seq.splice(i,1);},`Deleted ${n} · Ctrl Z to undo`);};
+function moveEarlier(i){ if(i<1) return; commit(()=>{[seq[i-1],seq[i]]=[seq[i],seq[i-1]];}); selIdx=i-1; renderTimeline(); }
+function moveLater(i){ if(i>=seq.length-1) return; commit(()=>{[seq[i+1],seq[i]]=[seq[i],seq[i+1]];}); selIdx=i+1; renderTimeline(); }
+function dupMove(i){ commit(()=>{seq.splice(i+1,0,{...seq[i]});},`Duplicated ${MOVES[seq[i].id].name}`); selIdx=i+1; renderTimeline(); }
+function delMove(i){ const n=MOVES[seq[i].id].name; selIdx=-1; commit(()=>{seq.splice(i,1);},`Deleted ${n} · Ctrl Z to undo`); }
 function scrollTimelineTo(){ const last=track.lastElementChild; if(last) last.scrollIntoView({block:'nearest'}); }
 
 /* ---- presets ---- */
@@ -1050,7 +1048,7 @@ function jumpMove(dir){const segs=TL.segs.filter(s=>!s.auto); if(!segs.length) r
 addEventListener('keydown',e=>{ const tag=e.target.tagName; if(tag==='INPUT') return;
   if(e.code==='Space'&&tag!=='BUTTON'){e.preventDefault();if(!recording)setPlaying(!playing);}
   else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
-  else if((e.key==='Delete'||e.key==='Backspace')&&selIdx>=0){e.preventDefault();$('selDel').click();}
+  else if((e.key==='Delete'||e.key==='Backspace')&&selIdx>=0&&seq[selIdx]){e.preventDefault();delMove(selIdx);}
   else if(e.key==='ArrowRight'){e.preventDefault();jumpMove(1);} else if(e.key==='ArrowLeft'){e.preventDefault();jumpMove(-1);} });
 
 /* ================= EXPORT ================= */
@@ -1060,7 +1058,7 @@ function browserSave(blob,name){const url=URL.createObjectURL(blob),a=document.c
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,opus','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
   for(const m of c) if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m; return '';}
 let recorder=null, chunks=[];
-function lockUI(v){document.querySelectorAll('button,select,input').forEach(el=>{if(el.id!=='export')el.disabled=v;}); $('recBadge').hidden=!v; if(!v){renderRoster();refreshPalette();$('undo').disabled=!hist.length;renderSel();}}
+function lockUI(v){document.querySelectorAll('button,select,input').forEach(el=>{if(el.id!=='export')el.disabled=v;}); $('recBadge').hidden=!v; if(!v){renderRoster();refreshPalette();$('undo').disabled=!hist.length;renderTimeline();}}
 const EXPORT_HTML=$('export').innerHTML;
 $('export').onclick=()=>{
   if(recording){stopRec(true);return;}

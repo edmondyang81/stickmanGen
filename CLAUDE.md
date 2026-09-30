@@ -108,7 +108,7 @@ Everything is synthesized with `nz()` (filtered noise) and `tone()` (oscillator 
 
 ## UI
 - **Tabs:** Moves (matchup card attacker ⇄ target, search, category chips, cards with pose thumbnails drawn by `thumb()`), Fighters (name, colour swatches, weapon, headband, add/remove), Settings (chaining, camera, title card, heads roll, name tags).
-- **Sequence list** (replaced the time-scaled timeline at the owner's request): a grid of numbered move cards in play order, with no ruler, playhead or scrubbing. Click a card to select it and seek; the edit bar offers Earlier/Later/Duplicate/Delete. HTML5 drag reorders. The playing move is highlighted. Auto get-ups aren't shown.
+- **Sequence list** (replaced the time-scaled timeline at the owner's request): a grid of numbered move cards in play order, with no ruler, playhead or scrubbing. Click a card to select it and seek. Each card has its own ◀ ▶ ⧉ ✕ buttons (earlier, later, duplicate, delete: `moveEarlier/moveLater/dupMove/delMove(i)`); there's no separate edit bar. HTML5 drag reorders. The playing move is highlighted. Auto get-ups aren't shown.
 - **Undo:** `commit(fn, msg)` pushes a snapshot, and `undo()` restores it. Ctrl/Cmd+Z works too.
 - **Keys:** Space (play/pause), ←/→ (previous/next move), Delete (remove selected move).
 - **Weapon change:** `pruneForWeapons()` removes moves that no longer fit, with Undo available. Random and Classic only pick valid moves.

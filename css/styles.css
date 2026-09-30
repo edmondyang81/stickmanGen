@@ -69,19 +69,22 @@ canvas{display:block;width:100%;height:100%}
 .acts{display:flex;flex-wrap:wrap;gap:6px}
 .trackwrap{border-radius:10px;background:var(--room);border:1px solid var(--line);padding:10px}
 .track{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.blk{position:relative;height:52px;border-radius:8px;background:var(--raise);border:1px solid var(--line);padding:6px 8px 5px 12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:grab;user-select:none;min-width:0}
+.blk{position:relative;gap:4px;border-radius:8px;background:var(--raise);border:1px solid var(--line);padding:6px 8px 5px 12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:grab;user-select:none;min-width:0}
 .blk:hover{border-color:var(--muted)}
 .blk .stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
 .blk .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blk .num{font-family:var(--mono);font-weight:400;color:var(--dim);margin-right:6px}
 .blk .sub{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:5px;align-items:center}
+.blk .ctl{display:flex;gap:4px;margin-top:2px}
+.blk .ctl button{flex:1;min-width:0;height:26px;padding:0;border-radius:6px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:11px;cursor:pointer;line-height:1}
+.blk .ctl button:hover:not(:disabled){color:var(--ink);border-color:var(--muted)}
+.blk .ctl button[data-act="X"]:hover{color:var(--red);border-color:var(--red)}
+.blk .ctl button:disabled{opacity:.3;cursor:default}
 .blk .ko{color:var(--red);font-weight:600}
 .blk.on{background:#2d3237;border-color:var(--red)}
 .blk.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
 .blk.drag{opacity:.35}
 .blk.dropL{box-shadow:inset 3px 0 0 var(--red)} .blk.dropR{box-shadow:inset -3px 0 0 var(--red)}
-.selbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--raise);border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 12px}
-.selbar .lbl{font-size:13px;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hint{font-size:12.5px;color:var(--muted);line-height:1.5}
 .empty{grid-column:1/-1;font-size:13px;color:var(--muted);padding:14px 4px}
 
