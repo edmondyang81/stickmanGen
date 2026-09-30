@@ -2,6 +2,12 @@
 
 All notable changes to StickMan Gen. Versions are tagged on GitHub (`v1.0`, `v1.1`, …).
 
+## Unreleased
+
+- Exported videos have a small "Made with StickMan Gen" credit in the bottom-right corner.
+- Each move card has its own earlier, later, duplicate and delete buttons.
+- Copy as text splits fights into clips of up to 30 s (was 15 s).
+
 ## v1.1 (2026-09-29)
 
 - Renamed from Stickman Duel to **StickMan Gen**. Added a footer with the version, "Made by Edmond Yang" and a GitHub link.

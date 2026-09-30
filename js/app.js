@@ -736,6 +736,18 @@ function frame(T){
   if(T>TL.end-.6){ctx.fillStyle=`rgba(251,251,249,${Math.min(1,(T-(TL.end-.6))/.5)})`;ctx.fillRect(0,0,W,H);}
   if(T<.2){ctx.fillStyle=`rgba(251,251,249,${1-T/.2})`;ctx.fillRect(0,0,W,H);}
   if(showTitle) drawTitle(T);
+  if(recording) drawWatermark();
+}
+// small "Made with StickMan Gen" credit, burned into exported videos only
+function drawWatermark(){
+  const fs=Math.round(H*.022), pad=Math.round(fs*.55), m=Math.round(H*.03), txt='Made with StickMan Gen';
+  ctx.save(); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.font=`600 ${fs}px "IBM Plex Sans", system-ui, sans-serif`; ctx.textBaseline='middle'; ctx.textAlign='left';
+  const tw=ctx.measureText(txt).width, bw=tw+pad*2, bh=fs+pad*1.2, x=W-m-bw, y=H-m-bh;
+  ctx.globalAlpha=.55; ctx.fillStyle='#111111'; ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(x,y,bw,bh,bh/2); else ctx.rect(x,y,bw,bh); ctx.fill();
+  ctx.globalAlpha=.95; ctx.fillStyle='#fbfbf9'; ctx.fillText(txt,x+pad,y+bh/2);
+  ctx.restore();
 }
 
 /* ================= STATE & UI ================= */

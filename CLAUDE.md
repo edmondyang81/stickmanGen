@@ -118,7 +118,7 @@ Everything is synthesized with `nz()` (filtered noise) and `tone()` (oscillator 
 `sequenceText()` builds a video prompt (for Seedance): fighter lines from the roster (fighters are always "Fighter One/Two/…" by roster position, never their names; no style paragraph, per the owner), then `[t0–t1s]` beats from `TL.segs` using `DESC[id]` (`{A}`/`{D}` placeholders; `*_keep` variants when heads roll is off). Times are wall-clock at the current speed, including slow-mo (`realTime()`), and the beats are split into clips of 30 s or less. **When adding a move, add a `DESC` line too.** `window.__stick.text()` returns the text.
 
 ## Export
-`MediaRecorder` captures `canvas.captureStream(60)` plus the audio track at 1920×1080, 10 Mbps, preferring MP4 (avc1) and falling back to WebM. It records in real time at the current speed. Inside claude.ai it uses the artifact `downloads` capability (`window.claude.use('downloads')`). Everywhere else (GitHub Pages, local) it uses `browserSave()`, which is a plain `<a download>`.
+`MediaRecorder` captures `canvas.captureStream(60)` plus the audio track at 1920×1080, 10 Mbps, preferring MP4 (avc1) and falling back to WebM. It records in real time at the current speed. While `recording`, `frame()` ends with `drawWatermark()`, a small "Made with StickMan Gen" pill in the bottom-right corner that appears in exports only, not in the normal preview. Inside claude.ai it uses the artifact `downloads` capability (`window.claude.use('downloads')`). Everywhere else (GitHub Pages, local) it uses `browserSave()`, which is a plain `<a download>`.
 
 ---
 
